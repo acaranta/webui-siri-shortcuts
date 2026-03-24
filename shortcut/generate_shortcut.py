@@ -579,16 +579,21 @@ Examples:
         default=8765,
         help="Port for the local HTTP server used with --serve (default: 8765)",
     )
+    parser.add_argument(
+        "--xml",
+        action="store_true",
+        help="Write XML (plain-text) plist instead of binary. Useful for inspection.",
+    )
     args = parser.parse_args()
 
     data = build_shortcut(server_url=args.url, api_key=args.api_key)
     out = Path(args.output)
 
-    # Write binary plist — required by the Shortcuts app
+    fmt = plistlib.FMT_XML if args.xml else plistlib.FMT_BINARY
     with out.open("wb") as f:
-        plistlib.dump(data, f, fmt=plistlib.FMT_BINARY)
+        plistlib.dump(data, f, fmt=fmt)
 
-    print(f"Shortcut written to: {out.resolve()}")
+    print(f"Shortcut written to: {out.resolve()} ({'XML' if args.xml else 'binary'})")
 
     if args.serve:
         _serve_and_print_url(out, port=args.port, name="Siri Plus")
