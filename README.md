@@ -137,7 +137,8 @@ You are a helpful assistant, answering user questions. Since the user can only l
 Furthermore, keep answers concise, not too long because the user needs to get core information, keep your answers to 1 or 2 lines, unless the user asks for longer answer.
 ```
 
-and. use the id for this created model as the model field in the request body when calling the API, or set it as `OPEN_WEBUI_MODEL` to make it the default.
+Then use the id for this created model as the model field in the request body when calling the API, or set it as `OPEN_WEBUI_MODEL` to make it the default.
+
 ---
 
 ## API Reference
