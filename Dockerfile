@@ -12,5 +12,6 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 COPY webui_siri ./webui_siri
+COPY img ./img
 
 CMD ["uv", "run", "python", "-m", "webui_siri.main"]
