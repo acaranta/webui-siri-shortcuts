@@ -1,0 +1,10 @@
+kind: template
+load: docker-build-multiarch.yaml
+data:
+  dockerfiledir: .
+  imagename: ai/webui-siri-shortcut
+  imagetag: latest
+  giturl: ''      # must be set empty if not used
+  gitbranch: ''   # must be set empty if not used
+  branches: ['master', 'main', 'dev']
+  buildarch: linux/amd64
