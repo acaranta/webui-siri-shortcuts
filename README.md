@@ -20,7 +20,6 @@ A stateless FastAPI service, packaged as a Docker container, that bridges Apple 
 - [Siri Shortcut Setup](#siri-shortcut-setup)
 - [Reverse Proxy and HTTPS](#reverse-proxy-and-https)
 - [Development](#development)
-- [CI / CD](#ci--cd)
 - [Architecture Notes](#architecture-notes)
 
 ---
@@ -295,12 +294,6 @@ uv run python -m webui_siri.main
 Interactive API docs are then available at `http://localhost:8080/api/docs`.
 
 **Stack:** Python 3.11+, FastAPI, uvicorn, httpx, pydantic-settings. Dependency management via [uv](https://github.com/astral-sh/uv).
-
----
-
-## CI / CD
-
-A Drone CI pipeline (`.drone.yml`) builds and publishes a multi-arch Docker image (`ai/webui-siri-shortcut:latest`) for `linux/amd64` on pushes to `master`, `main`, and `dev`. The pipeline uses a shared template (`docker-build-multiarch.yaml`).
 
 ---
 
