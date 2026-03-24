@@ -14,21 +14,38 @@ This guide explains how to create the "Siri Plus" shortcut that bridges Siri to 
 
 ## Option A: Generate the shortcut automatically
 
-Run the provided script on macOS (no extra dependencies required):
+> **macOS Sequoia (15+) and iOS 18+ restriction:** Apple blocks importing
+> unsigned `.shortcut` files from disk on these versions. Use the `--serve`
+> flag (described below) to import via the `shortcuts://` URL scheme instead,
+> which bypasses the restriction.
+
+### Quick start (all macOS/iOS versions)
 
 ```bash
 python shortcut/generate_shortcut.py \
   --url https://YOUR_SERVER \
   --api-key YOUR_API_KEY \
-  --output siri-plus.shortcut
+  --serve
+```
+
+The script writes `siri-plus.shortcut`, starts a local HTTP server, and prints
+a `shortcuts://import-shortcut?url=...` link. Open that link in **Safari** on
+your iPhone or Mac — the Shortcuts app opens and asks you to add the shortcut.
+
+If `qrencode` is installed (`brew install qrencode`), the script also prints a
+QR code you can scan with your iPhone camera.
+
+### macOS Ventura / Sonoma / iOS 16–17 (file import)
+
+On these older versions you can import the file directly:
+
+```bash
+python shortcut/generate_shortcut.py \
+  --url https://YOUR_SERVER \
+  --api-key YOUR_API_KEY
 ```
 
 Then double-click `siri-plus.shortcut` to import it into the Shortcuts app.
-
-If the import fails, convert it to binary plist first:
-```bash
-plutil -convert binary1 siri-plus.shortcut
-```
 
 ---
 

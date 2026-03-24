@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
 """Generate a Siri Plus .shortcut file for webui-siri-shortcut.
 
-Produces an Apple Shortcuts plist (XML format) that can be imported directly
-on macOS by double-clicking, or converted to binary plist for iOS:
+Produces an Apple Shortcuts binary plist that can be imported via URL scheme.
 
-    plutil -convert binary1 siri-plus.shortcut
+IMPORTANT — unsigned shortcut files:
+  macOS Sequoia (15+) and iOS 18+ block importing unsigned .shortcut files
+  directly from disk or AirDrop.  Use --serve to start a local HTTP server
+  and import via the shortcuts:// URL scheme instead, which bypasses the
+  file-signing restriction.
 
 Usage:
+    # recommended: generate + serve for URL-scheme import
+    python generate_shortcut.py --url https://YOUR_SERVER --api-key YOUR_KEY --serve
+
+    # generate file only (works on macOS Ventura/Sonoma and iOS 16/17)
     python generate_shortcut.py --url https://YOUR_SERVER --api-key YOUR_KEY
-    python generate_shortcut.py --url https://YOUR_SERVER --api-key YOUR_KEY \\
-        --output my-shortcut.shortcut
 
 No external dependencies required — uses only the Python standard library.
 """
 from __future__ import annotations
 
 import argparse
+import http.server
+import ipaddress
 import plistlib
-import sys
+import socket
+import threading
+import urllib.parse
 import uuid
 from pathlib import Path
 
@@ -455,20 +464,89 @@ def build_shortcut(server_url: str, api_key: str) -> dict:
 # CLI entry point
 # ---------------------------------------------------------------------------
 
+def _local_ip() -> str:
+    """Return the machine's LAN IP address (best-effort)."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except Exception:
+        return "127.0.0.1"
+
+
+def _serve_and_print_url(path: Path, port: int, name: str) -> None:
+    """Start a one-shot HTTP server in the background and print the import URL.
+
+    The server stays up until the user presses Ctrl-C.  The shortcuts://
+    URL scheme works on iOS and macOS and bypasses the unsigned-file
+    restriction present in macOS Sequoia and iOS 18+.
+    """
+    directory = str(path.parent.resolve())
+    filename = path.name
+
+    class _Handler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=directory, **kwargs)
+
+        def log_message(self, fmt, *args):  # silence default access log
+            pass
+
+    server = http.server.HTTPServer(("0.0.0.0", port), _Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    lan_ip = _local_ip()
+    file_url = f"http://{lan_ip}:{port}/{urllib.parse.quote(filename)}"
+    import_url = (
+        f"shortcuts://import-shortcut"
+        f"?url={urllib.parse.quote(file_url, safe='')}"
+        f"&name={urllib.parse.quote(name)}"
+    )
+
+    print()
+    print("=" * 60)
+    print("Serving shortcut for URL-scheme import")
+    print("=" * 60)
+    print()
+    print(f"File URL : {file_url}")
+    print()
+    print("On your iPhone or Mac, open this URL in Safari:")
+    print()
+    print(f"  {import_url}")
+    print()
+    print("Or scan the QR code below (requires 'qrencode' to be installed):")
+    print()
+    import subprocess
+    try:
+        subprocess.run(["qrencode", "-t", "UTF8", import_url], check=True)
+    except FileNotFoundError:
+        print("  (install qrencode for QR output: brew install qrencode)")
+    except subprocess.CalledProcessError:
+        pass
+    print()
+    print("Press Ctrl-C to stop the server once the shortcut is imported.")
+    print()
+    try:
+        thread.join()
+    except KeyboardInterrupt:
+        print("\nServer stopped.")
+        server.shutdown()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate a Siri Plus .shortcut file for webui-siri-shortcut.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  python generate_shortcut.py --url https://siri.example.com --api-key abc123
-  python generate_shortcut.py --url https://siri.example.com --api-key abc123 \\
-      --output my-siri-plus.shortcut
+NOTE: macOS Sequoia (15+) and iOS 18+ block importing unsigned .shortcut
+files from disk. Use --serve to bypass this restriction via URL-scheme import.
 
-After generating:
-  - macOS: double-click the .shortcut file to import
-  - If that fails: plutil -convert binary1 siri-plus.shortcut
-  - iOS: AirDrop the file to your device, then tap to import
+Examples:
+  # Recommended — generate and serve for URL-scheme import:
+  python generate_shortcut.py --url https://siri.example.com --api-key abc123 --serve
+
+  # Generate file only (works on macOS Ventura/Sonoma, iOS 16/17):
+  python generate_shortcut.py --url https://siri.example.com --api-key abc123
         """,
     )
     parser.add_argument(
@@ -486,20 +564,42 @@ After generating:
         default="siri-plus.shortcut",
         help="Output file path (default: siri-plus.shortcut)",
     )
+    parser.add_argument(
+        "--serve",
+        action="store_true",
+        help=(
+            "After generating, start a local HTTP server and print the "
+            "shortcuts:// URL for importing. Bypasses the unsigned-file "
+            "restriction on macOS Sequoia / iOS 18+."
+        ),
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8765,
+        help="Port for the local HTTP server used with --serve (default: 8765)",
+    )
     args = parser.parse_args()
 
     data = build_shortcut(server_url=args.url, api_key=args.api_key)
     out = Path(args.output)
 
+    # Write binary plist — required by the Shortcuts app
     with out.open("wb") as f:
-        plistlib.dump(data, f, fmt=plistlib.FMT_XML)
+        plistlib.dump(data, f, fmt=plistlib.FMT_BINARY)
 
-    print(f"Shortcut written to: {out}")
-    print()
-    print("Import options:")
-    print(f"  macOS: double-click {out}")
-    print(f"  If import fails, convert first: plutil -convert binary1 {out}")
-    print(f"  iOS: AirDrop {out} to your device, then tap to import")
+    print(f"Shortcut written to: {out.resolve()}")
+
+    if args.serve:
+        _serve_and_print_url(out, port=args.port, name="Siri Plus")
+    else:
+        print()
+        print("Import options:")
+        print(f"  macOS Ventura/Sonoma : double-click {out}")
+        print(f"  macOS Sequoia / iOS 18+ : re-run with --serve and open the")
+        print(f"                            shortcuts:// URL in Safari on your device")
+        print()
+        print("Tip: --serve starts a local HTTP server and prints a one-tap import URL.")
 
 
 if __name__ == "__main__":

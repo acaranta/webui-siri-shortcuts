@@ -89,10 +89,13 @@ curl http://localhost:8080/api/health
 python shortcut/generate_shortcut.py \
   --url https://YOUR_SERVER \
   --api-key YOUR_API_KEY \
-  --output siri-plus.shortcut
+  --serve
 ```
 
-Double-click `siri-plus.shortcut` on macOS to import, or AirDrop it to your iPhone.
+The script generates `siri-plus.shortcut`, starts a local HTTP server, and prints a
+`shortcuts://` URL. Open that URL in **Safari** on your device to import — this works
+on all macOS/iOS versions including Sequoia and iOS 18+ (direct file import is blocked
+on those versions).
 
 See [shortcut/SETUP.md](shortcut/SETUP.md) for the manual build guide and troubleshooting tips.
 
@@ -218,20 +221,20 @@ Health check. No authentication required.
 
 ### Option A — Generate automatically (recommended)
 
-Run the provided script on macOS (no extra dependencies beyond a standard Python 3 installation):
+Run the provided script on macOS (stdlib only, no extra dependencies):
 
 ```bash
 python shortcut/generate_shortcut.py \
   --url https://YOUR_SERVER \
   --api-key YOUR_API_KEY \
-  --output siri-plus.shortcut
+  --serve
 ```
 
-Double-click `siri-plus.shortcut` to import it into the Shortcuts app. If the import fails, convert it first:
+The `--serve` flag starts a local HTTP server and prints a `shortcuts://import-shortcut?url=...`
+link. Open it in **Safari** on your iPhone or Mac to import. This works on all versions including
+macOS Sequoia and iOS 18+, where direct file import is blocked for unsigned shortcuts.
 
-```bash
-plutil -convert binary1 siri-plus.shortcut
-```
+Without `--serve` (macOS Ventura/Sonoma, iOS 16–17 only), double-click `siri-plus.shortcut` to import.
 
 ### Option B — Build manually
 
