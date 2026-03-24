@@ -1,21 +1,47 @@
 # webui-siri-shortcut
 
-A stateless Docker service that bridges Apple Siri Shortcuts to an [Open WebUI](https://github.com/open-webui/open-webui) instance. Invoke it with "Hey Siri, Siri Plus" for a voice-driven LLM conversation.
+A stateless FastAPI service, packaged as a Docker container, that bridges Apple Siri Shortcuts to an [Open WebUI](https://github.com/open-webui/open-webui) instance. Say "Hey Siri, Siri Plus" to start a voice-driven LLM conversation — your words are transcribed by the Shortcuts app, sent to the service, and the LLM response is spoken back to you.
 
-Modeled on [webui-grambot](https://git.minixer.com/Albus-Insec/webui-grambot) — same OpenWebUI API integration, without the Telegram dependency.
+Modeled on [webui-grambot](https://git.minixer.com/Albus-Insec/webui-grambot) — same Open WebUI API integration, without the Telegram dependency.
+
+---
+
+## Table of Contents
+
+- [How it works](#how-it-works)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [OPEN_WEBUI_FOLDER — chat organisation](#open_webui_folder--chat-organisation)
+- [API Reference](#api-reference)
+- [Siri Shortcut Setup](#siri-shortcut-setup)
+- [Reverse Proxy and HTTPS](#reverse-proxy-and-https)
+- [Development](#development)
+- [CI / CD](#ci--cd)
+- [Architecture Notes](#architecture-notes)
 
 ---
 
 ## How it works
 
-1. Siri Shortcut is invoked ("Hey Siri, Siri Plus")
-2. Shortcut speaks "Yes?" and records your question
-3. Shortcut calls `POST /api/chat` → service creates a new Open WebUI chat and sends the message
-4. LLM response is spoken back to you
-5. Shortcut asks if you want to continue — voice input is used as the next prompt
-6. Say "no", "nope", "none", "stop" (or any phrase containing "no") to end the conversation
+1. You invoke the Siri Shortcut ("Hey Siri, Siri Plus").
+2. The shortcut says "Yes?" and records your spoken question via dictation.
+3. The shortcut calls `POST /api/chat` — the service creates a new Open WebUI chat and sends the first message.
+4. The LLM response is spoken back to you.
+5. The shortcut asks if you want to continue — your next dictation becomes the follow-up message.
+6. Say "no", "nope", "none", "stop", or any phrase containing "no" to end the session.
 
-All conversation history is stored in Open WebUI (visible in the web UI).
+All conversation history is stored in Open WebUI and visible in its browser interface.
+
+---
+
+## Prerequisites
+
+- Docker and Docker Compose on your home server
+- A running [Open WebUI](https://github.com/open-webui/open-webui) instance reachable from the server
+- An Open WebUI API token (Settings → Account → API Keys)
+- The service must be reachable over **HTTPS** from your iPhone or Mac (iOS/macOS Shortcuts blocks plain HTTP)
+- iOS 16+ or macOS Ventura+ for the Siri Shortcut
 
 ---
 
@@ -25,8 +51,16 @@ All conversation history is stored in Open WebUI (visible in the web UI).
 
 ```bash
 cp docker-compose.yml.example docker-compose.yml
-# Edit docker-compose.yml with your values
 ```
+
+Edit `docker-compose.yml` and fill in at minimum:
+
+| Field | What to set |
+|---|---|
+| `OPEN_WEBUI_URL` | Base URL of your Open WebUI instance |
+| `OPEN_WEBUI_TOKEN` | API token from Open WebUI → Settings → Account → API Keys |
+| `OPEN_WEBUI_MODEL` | Model ID to use (e.g. `llama3.2`, `gpt-4o`) |
+| `API_KEY` | A random secret — see step 2 |
 
 ### 2. Generate an API key
 
@@ -34,13 +68,15 @@ cp docker-compose.yml.example docker-compose.yml
 openssl rand -hex 32
 ```
 
+Paste the output into `API_KEY` in `docker-compose.yml`.
+
 ### 3. Start the service
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Verify it's running
+### 4. Verify it is running
 
 ```bash
 curl http://localhost:8080/api/health
@@ -49,49 +85,81 @@ curl http://localhost:8080/api/health
 
 ### 5. Set up the Siri Shortcut
 
-See [shortcut/SETUP.md](shortcut/SETUP.md) for the manual setup guide, or generate the shortcut automatically:
-
 ```bash
 python shortcut/generate_shortcut.py \
   --url https://YOUR_SERVER \
-  --api-key YOUR_API_KEY
+  --api-key YOUR_API_KEY \
+  --output siri-plus.shortcut
 ```
+
+Double-click `siri-plus.shortcut` on macOS to import, or AirDrop it to your iPhone.
+
+See [shortcut/SETUP.md](shortcut/SETUP.md) for the manual build guide and troubleshooting tips.
 
 ---
 
 ## Configuration
 
-All configuration is via environment variables:
+All configuration is through environment variables. Set them in `docker-compose.yml`.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `OPEN_WEBUI_URL` | yes | — | Base URL of your Open WebUI instance |
-| `OPEN_WEBUI_TOKEN` | yes | — | Open WebUI API token (Settings → Account → API Keys) |
-| `OPEN_WEBUI_MODEL` | yes | — | Default LLM model ID (e.g. `llama3.2`, `gpt-4o`) |
-| `API_KEY` | yes | — | Shared secret for the Siri Shortcut (`X-API-Key` header) |
-| `API_PORT` | no | `8080` | Port the service listens on |
-| `OPEN_WEBUI_FOLDER` | no | — | Folder name for new chats in Open WebUI |
+| `OPEN_WEBUI_URL` | yes | — | Base URL of your Open WebUI instance (e.g. `http://open-webui:3000`) |
+| `OPEN_WEBUI_TOKEN` | yes | — | Open WebUI API token |
+| `OPEN_WEBUI_MODEL` | yes | — | Default model ID (e.g. `llama3.2`, `gpt-4o`) |
+| `API_KEY` | yes | — | Shared secret sent by the Siri Shortcut in the `X-API-Key` header |
+| `API_PORT` | no | `8080` | Port the service listens on inside the container |
+| `OPEN_WEBUI_FOLDER` | no | — | Name of the Open WebUI folder to file Siri chats under — see below |
+
+---
+
+## OPEN_WEBUI_FOLDER — chat organisation
+
+When `OPEN_WEBUI_FOLDER` is set, every chat created by this service is automatically moved into a named folder in Open WebUI (e.g. `"Siri"`). This keeps your Siri conversations separated from chats you start manually in the browser.
+
+**Behaviour:**
+
+- At the time the first chat is created after startup, the service looks up the folder by name via the Open WebUI API.
+- If the folder does not exist it is created automatically.
+- The resolved folder ID is cached for the lifetime of the process. No repeated lookups are made.
+- Restarting the container clears the cache; the lookup runs again on the next chat creation.
+
+**Example `docker-compose.yml` snippet:**
+
+```yaml
+environment:
+  OPEN_WEBUI_FOLDER: "Siri"
+```
+
+Leave the variable unset (or remove the line) to disable folder filing — new chats will land in the default location.
 
 ---
 
 ## API Reference
 
-All chat endpoints require the `X-API-Key` header.
+All chat endpoints require the header `X-API-Key: <your key>`. The health endpoint has no authentication.
 
-### `POST /api/chat`
+Interactive API docs are available at `http://localhost:8080/api/docs` while the service is running.
 
-Start a new conversation.
+---
 
-**Request:**
+### POST /api/chat
+
+Start a new conversation. Returns a `chat_id` that must be passed to subsequent follow-up requests.
+
+**Request body:**
+
 ```json
 {
   "message": "What is the capital of France?",
   "model": "llama3.2"
 }
 ```
-`model` is optional — defaults to `OPEN_WEBUI_MODEL`.
+
+`model` is optional and defaults to `OPEN_WEBUI_MODEL`.
 
 **Response:**
+
 ```json
 {
   "chat_id": "abc123-...",
@@ -101,6 +169,7 @@ Start a new conversation.
 ```
 
 **Example:**
+
 ```bash
 curl -s -X POST https://YOUR_SERVER/api/chat \
   -H "X-API-Key: YOUR_KEY" \
@@ -110,11 +179,12 @@ curl -s -X POST https://YOUR_SERVER/api/chat \
 
 ---
 
-### `POST /api/chat/{chat_id}/message`
+### POST /api/chat/{chat_id}/message
 
-Send a follow-up message to an existing chat.
+Send a follow-up message to an existing chat. Conversation history stored in Open WebUI is included automatically as context.
 
-**Request:**
+**Request body:**
+
 ```json
 {
   "message": "And what language do they speak there?"
@@ -122,6 +192,7 @@ Send a follow-up message to an existing chat.
 ```
 
 **Response:**
+
 ```json
 {
   "chat_id": "abc123-...",
@@ -131,41 +202,23 @@ Send a follow-up message to an existing chat.
 
 ---
 
-### `GET /api/health`
+### GET /api/health
 
-Health check — no authentication required.
+Health check. No authentication required.
 
 **Response:**
+
 ```json
 {"status": "ok"}
 ```
 
 ---
 
-## Development
+## Siri Shortcut Setup
 
-```bash
-# Install dependencies
-uv sync
+### Option A — Generate automatically (recommended)
 
-# Run locally (set env vars first)
-export OPEN_WEBUI_URL=http://localhost:3000
-export OPEN_WEBUI_TOKEN=sk-your-token
-export OPEN_WEBUI_MODEL=llama3.2
-export API_KEY=dev-key-123
-
-uv run python -m webui_siri.main
-```
-
-API docs available at `http://localhost:8080/api/docs` while the service is running.
-
----
-
-## Siri Shortcut
-
-See [shortcut/SETUP.md](shortcut/SETUP.md) for detailed setup instructions.
-
-### Quick generate
+Run the provided script on macOS (no extra dependencies beyond a standard Python 3 installation):
 
 ```bash
 python shortcut/generate_shortcut.py \
@@ -174,21 +227,81 @@ python shortcut/generate_shortcut.py \
   --output siri-plus.shortcut
 ```
 
-Then double-click `siri-plus.shortcut` on macOS to import, or AirDrop to iOS.
+Double-click `siri-plus.shortcut` to import it into the Shortcuts app. If the import fails, convert it first:
+
+```bash
+plutil -convert binary1 siri-plus.shortcut
+```
+
+### Option B — Build manually
+
+Follow the step-by-step guide in [shortcut/SETUP.md](shortcut/SETUP.md). The guide covers each Shortcuts action, variable naming, the follow-up loop, and the stop-phrase detection logic.
+
+### Security note
+
+The API key is stored in plain text inside the shortcut file. Do not share the exported `.shortcut` file with others. If the key is compromised, generate a new one (`openssl rand -hex 32`), update `API_KEY` in `docker-compose.yml`, and rebuild the shortcut.
+
+---
+
+## Reverse Proxy and HTTPS
+
+iOS and macOS Shortcuts enforce HTTPS for all outbound URL requests. The container itself serves plain HTTP — you must place it behind a reverse proxy that handles TLS termination.
+
+**nginx example:**
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name siri.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/siri.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/siri.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_read_timeout 120s;
+    }
+}
+```
+
+Set `proxy_read_timeout` to at least `90s`. LLM inference can take 5–30 seconds and the Shortcuts app has a hard URL request timeout of approximately 60 seconds; large models on slow hardware can approach this limit.
+
+Self-signed certificates will fail on iOS unless you install a trust profile on the device.
+
+---
+
+## Development
+
+```bash
+# Install dependencies (requires uv)
+uv sync
+
+# Set required environment variables
+export OPEN_WEBUI_URL=http://localhost:3000
+export OPEN_WEBUI_TOKEN=sk-your-token
+export OPEN_WEBUI_MODEL=llama3.2
+export API_KEY=dev-key-123
+
+# Run locally
+uv run python -m webui_siri.main
+```
+
+Interactive API docs are then available at `http://localhost:8080/api/docs`.
+
+**Stack:** Python 3.11+, FastAPI, uvicorn, httpx, pydantic-settings. Dependency management via [uv](https://github.com/astral-sh/uv).
+
+---
+
+## CI / CD
+
+A Drone CI pipeline (`.drone.yml`) builds and publishes a multi-arch Docker image (`ai/webui-siri-shortcut:latest`) for `linux/amd64` on pushes to `master`, `main`, and `dev`. The pipeline uses a shared template (`docker-build-multiarch.yaml`).
 
 ---
 
 ## Architecture Notes
 
-- **Stateless service** — no database. All conversation history lives in Open WebUI.
-- The Siri Shortcut stores `chat_id` locally in a variable between loop iterations.
-- OpenWebUI's linked-list chat history is fully managed: each message is written to the history so the conversation is visible in the Open WebUI browser interface.
-- The service requires HTTPS on iOS/macOS — deploy behind a reverse proxy with TLS.
-
----
-
-## Deployment with reverse proxy
-
-Put the container behind nginx or Traefik with a valid TLS certificate. The iOS Shortcuts app blocks plain HTTP requests.
-
-See the nginx example in [shortcut/SETUP.md](shortcut/SETUP.md).
+- **Stateless** — no database, no volumes. All conversation history lives in Open WebUI.
+- The Siri Shortcut holds `chat_id` in a local variable across loop iterations; the service itself is session-unaware.
+- Open WebUI's linked-list message history is fully maintained by the service: each message is written back so the conversation is readable in the browser interface.
+- The folder ID resolved via `OPEN_WEBUI_FOLDER` is process-scoped. It is looked up once and cached in memory; a container restart resets the cache.
