@@ -88,21 +88,9 @@ curl http://localhost:8080/api/health
 ```
 
 ### 5. Set up the Siri Shortcut
+The simplest method is to acces and install the shortcut template : https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc
 
-```bash
-python shortcut/generate_shortcut.py \
-  --url https://YOUR_SERVER \
-  --api-key YOUR_API_KEY \
-  --serve
-```
-
-The script generates `siri-plus.shortcut`, starts a local HTTP server, and prints a
-`shortcuts://` URL. Open that URL in **Safari** on your device to import — this works
-on all macOS/iOS versions including Sequoia and iOS 18+ (direct file import is blocked
-on those versions).
-
-See [shortcut/SETUP.md](shortcut/SETUP.md) for the manual build guide and troubleshooting tips.
-
+Then rename the template to whatever you wish to invoke with Siri (e.g. "Siri Plus"). Edit the shortcut and set the `Base URL` and `API Key` fields to match your configuration.
 ---
 
 ## Configuration
