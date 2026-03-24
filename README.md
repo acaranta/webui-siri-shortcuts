@@ -128,6 +128,16 @@ environment:
 
 Leave the variable unset (or remove the line) to disable folder filing — new chats will land in the default location.
 
+
+## Model Consideration ##
+To get more specific answers, it is advised to use a more refined model, using OpenwebUI model creation (Workspace → Models → Create Model) with a system prompt like:
+
+```
+You are a helpful assistant, answering user questions. Since the user can only listen to your answer, please do not add links or other unspeakable items or informations.
+Furthermore, keep answers concise, not too long because the user needs to get core information, keep your answers to 1 or 2 lines, unless the user asks for longer answer.
+```
+
+and. use the id for this created model as the model field in the request body when calling the API, or set it as `OPEN_WEBUI_MODEL` to make it the default.
 ---
 
 ## API Reference
