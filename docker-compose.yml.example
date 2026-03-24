@@ -8,7 +8,9 @@ services:
       OPEN_WEBUI_MODEL: "llama3.2"
       API_KEY: ""                 # generate with: openssl rand -hex 32
       API_PORT: "8080"
-      # OPEN_WEBUI_FOLDER: "Siri" # optional: folder name for new chats in Open WebUI
+      # Optional: file all Siri chats under a named folder in Open WebUI.
+      # The folder is created automatically if it does not exist.
+      OPEN_WEBUI_FOLDER: "Siri"
     ports:
       - "8080:8080"
     restart: unless-stopped
