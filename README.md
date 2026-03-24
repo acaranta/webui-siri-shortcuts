@@ -11,16 +11,30 @@ A stateless FastAPI service, packaged as a Docker container, that bridges Apple 
 
 ## Table of Contents
 
-- [How it works](#how-it-works)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [OPEN_WEBUI_FOLDER — chat organisation](#open_webui_folder--chat-organisation)
-- [API Reference](#api-reference)
-- [Siri Shortcut Setup](#siri-shortcut-setup)
-- [Reverse Proxy and HTTPS](#reverse-proxy-and-https)
-- [Development](#development)
-- [Architecture Notes](#architecture-notes)
+- [webui-siri-shortcut](#webui-siri-shortcut)
+  - [Table of Contents](#table-of-contents)
+  - [How it works](#how-it-works)
+  - [Prerequisites](#prerequisites)
+  - [Quick Start](#quick-start)
+    - [1. Copy and fill in the config](#1-copy-and-fill-in-the-config)
+    - [2. Generate an API key](#2-generate-an-api-key)
+    - [3. Start the service](#3-start-the-service)
+    - [4. Verify it is running](#4-verify-it-is-running)
+    - [5. Set up the Siri Shortcut](#5-set-up-the-siri-shortcut)
+  - [Configuration](#configuration)
+  - [OPEN\_WEBUI\_FOLDER — chat organisation](#open_webui_folder--chat-organisation)
+  - [Model Consideration](#model-consideration)
+  - [API Reference](#api-reference)
+    - [POST /api/chat](#post-apichat)
+    - [POST /api/chat/{chat\_id}/message](#post-apichatchat_idmessage)
+    - [GET /api/health](#get-apihealth)
+  - [Siri Shortcut Setup](#siri-shortcut-setup)
+    - [Option A — Generate automatically (recommended)](#option-a--generate-automatically-recommended)
+    - [Option B — Build manually](#option-b--build-manually)
+    - [Security note](#security-note)
+  - [Reverse Proxy and HTTPS](#reverse-proxy-and-https)
+  - [Development](#development)
+  - [Architecture Notes](#architecture-notes)
 
 ---
 
@@ -86,9 +100,10 @@ curl http://localhost:8080/api/health
 ```
 
 ### 5. Set up the Siri Shortcut
-The simplest method is to acces and install the shortcut template : https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc
+The simplest method is to acces and install the [Siri Plus shortcut template](https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc).
 
 Then rename the template to whatever you wish to invoke with Siri (e.g. "Siri Plus"). Edit the shortcut and set the `Base URL` and `API Key` fields to match your configuration.
+
 ---
 
 ## Configuration
