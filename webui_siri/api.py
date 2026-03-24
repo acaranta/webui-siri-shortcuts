@@ -1,16 +1,67 @@
 from __future__ import annotations
 
+import pathlib
 from typing import Optional
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Security
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security.api_key import APIKeyHeader
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from webui_siri.config import AppConfig
 from webui_siri.logging_setup import get_logger
 from webui_siri.openwebui import ChatAccessError, OpenWebUIClient
+
+# Resolve the repo root's img/ directory relative to this file
+_REPO_ROOT = pathlib.Path(__file__).parent.parent
+_IMG_DIR = _REPO_ROOT / "img"
+
+_LANDING_HTML = """\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>webui-siri-shortcut</title>
+  <style>
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      gap: 1.5rem;
+      padding: 2rem;
+    }}
+    img {{ width: 140px; height: 140px; object-fit: contain; }}
+    h1 {{ font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }}
+    p {{ color: #888; font-size: 0.95rem; text-align: center; max-width: 34ch; line-height: 1.5; }}
+    .badge {{
+      display: inline-block;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      color: #5ac8fa;
+      font-family: ui-monospace, monospace;
+    }}
+  </style>
+</head>
+<body>
+  <img src="/img/webui-siri-logo.png" alt="webui-siri-shortcut logo"/>
+  <h1>webui-siri-shortcut</h1>
+  <p>Siri Shortcut bridge for Open&nbsp;WebUI — say <em>"Hey Siri, Siri Plus"</em> to start a conversation.</p>
+  <span class="badge">GET /api/health &nbsp;·&nbsp; POST /api/chat</span>
+</body>
+</html>
+"""
 
 _log = get_logger("webui_siri.api")
 
@@ -55,10 +106,18 @@ def create_app(config: AppConfig, openwebui: OpenWebUIClient) -> FastAPI:
         openapi_url="/api/openapi.json",
     )
 
+    # Serve the logo (and any other assets placed in img/)
+    if _IMG_DIR.is_dir():
+        app.mount("/img", StaticFiles(directory=str(_IMG_DIR)), name="img")
+
     async def require_api_key(key: str = Security(_API_KEY_HEADER)) -> str:
         if key != config.api_key:
             raise HTTPException(status_code=403, detail="Invalid or missing API key")
         return key
+
+    @app.get("/", include_in_schema=False)
+    async def root() -> HTMLResponse:
+        return HTMLResponse(content=_LANDING_HTML)
 
     @app.get("/api", include_in_schema=False)
     async def api_root() -> RedirectResponse:

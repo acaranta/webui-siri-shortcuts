@@ -1,5 +1,9 @@
 # webui-siri-shortcut
 
+<p align="center">
+  <img src="img/webui-siri-logo.png" alt="webui-siri-shortcut logo" width="200"/>
+</p>
+
 A stateless FastAPI service, packaged as a Docker container, that bridges Apple Siri Shortcuts to an [Open WebUI](https://github.com/open-webui/open-webui) instance. Say "Hey Siri, Siri Plus" to start a voice-driven LLM conversation — your words are transcribed by the Shortcuts app, sent to the service, and the LLM response is spoken back to you.
 
 Modeled on [webui-grambot](https://git.minixer.com/Albus-Insec/webui-grambot) — same Open WebUI API integration, without the Telegram dependency.
