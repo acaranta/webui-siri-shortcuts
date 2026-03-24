@@ -26,8 +26,8 @@ _LANDING_HTML = """\
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>webui-siri-shortcut</title>
   <style>
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -38,11 +38,12 @@ _LANDING_HTML = """\
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       gap: 1.5rem;
       padding: 2rem;
-    }}
-    img {{ width: 56px; height: 56px; object-fit: contain; }}
-    h1 {{ font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }}
-    p {{ color: #888; font-size: 0.95rem; text-align: center; max-width: 34ch; line-height: 1.5; }}
-    .badge {{
+      text-align: center;
+    }
+    img { width: 140px; height: 140px; object-fit: contain; }
+    h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
+    p { color: #888; font-size: 0.95rem; max-width: 34ch; line-height: 1.5; }
+    .badge {
       display: inline-block;
       background: #1a1a1a;
       border: 1px solid #2a2a2a;
@@ -51,7 +52,7 @@ _LANDING_HTML = """\
       font-size: 0.8rem;
       color: #5ac8fa;
       font-family: ui-monospace, monospace;
-    }}
+    }
   </style>
 </head>
 <body>
