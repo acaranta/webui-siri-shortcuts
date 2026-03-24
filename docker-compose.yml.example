@@ -1,0 +1,19 @@
+services:
+  webui-siri-shortcut:
+    build: .
+    container_name: webui-siri-shortcut
+    environment:
+      OPEN_WEBUI_URL: "http://open-webui:3000"
+      OPEN_WEBUI_TOKEN: ""        # your Open WebUI API token (Settings → Account → API Keys)
+      OPEN_WEBUI_MODEL: "llama3.2"
+      API_KEY: ""                 # generate with: openssl rand -hex 32
+      API_PORT: "8080"
+      # OPEN_WEBUI_FOLDER: "Siri" # optional: folder name for new chats in Open WebUI
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    # Note: no volumes needed — this service is stateless.
+    # All conversation history is stored in Open WebUI.
+
+    # Note: the service must be reachable over HTTPS from iOS/macOS Shortcuts.
+    # Put it behind a reverse proxy (nginx/Traefik) with a valid TLS certificate.
