@@ -1,6 +1,6 @@
 services:
   webui-siri-shortcut:
-    image: acaranta/webui-siri-shortcuts:latest
+    build: .
     container_name: webui-siri-shortcut
     environment:
       OPEN_WEBUI_URL: "http://open-webui:3000"
