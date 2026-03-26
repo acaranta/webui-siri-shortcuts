@@ -7,7 +7,8 @@
 <p align="center">
   <a href="https://github.com/acaranta/webui-siri-shortcuts"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-acaranta%2Fwebui--siri--shortcuts-181717?logo=github"/></a>
   <a href="https://hub.docker.com/r/acaranta/webui-siri-shortcuts"><img alt="Docker Hub" src="https://img.shields.io/badge/Docker%20Hub-acaranta%2Fwebui--siri--shortcuts-2496ED?logo=docker&logoColor=white"/></a>
-  <a href="https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc"><img alt="Siri Shortcut" src="https://img.shields.io/badge/Siri%20Shortcut-Get%20Template-5ac8fa?logo=apple"/></a>
+  <a href="https://www.icloud.com/shortcuts/980fff4cb9fb479fadc07bef96d6943e"><img alt="Siri Shortcut 🇬🇧" src="https://img.shields.io/badge/Siri%20Shortcut-%F0%9F%87%AC%F0%9F%87%A7%20EN-5ac8fa?logo=apple"/></a>
+  <a href="https://www.icloud.com/shortcuts/e641e22518e445d7b01877bd65dde2de"><img alt="Siri Shortcut 🇫🇷" src="https://img.shields.io/badge/Siri%20Shortcut-%F0%9F%87%AB%F0%9F%87%B7%20FR-5ac8fa?logo=apple"/></a>
 </p>
 
 A stateless FastAPI service, packaged as a Docker container, that bridges Apple Siri Shortcuts to an [Open WebUI](https://github.com/open-webui/open-webui) instance. Say "Hey Siri, Siri Plus" to start a voice-driven LLM conversation — your words are transcribed by the Shortcuts app, sent to the service, and the LLM response is spoken back to you.
@@ -108,7 +109,7 @@ curl http://localhost:8080/api/health
 ```
 
 ### 5. Set up the Siri Shortcut
-The simplest method is to acces and install the [Siri Plus shortcut template](https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc).
+The simplest method is to install the Siri Plus shortcut template directly from iCloud: [🇬🇧 English](https://www.icloud.com/shortcuts/980fff4cb9fb479fadc07bef96d6943e) · [🇫🇷 French](https://www.icloud.com/shortcuts/e641e22518e445d7b01877bd65dde2de).
 
 Then rename the template to whatever you wish to invoke with Siri (e.g. "Siri Plus"). Edit the shortcut and set the `Base URL` and `API Key` fields to match your configuration.
 
@@ -245,7 +246,7 @@ Health check. No authentication required.
 
 ### Option A — Generate automatically (recommended)
 
-**Quickest method:** Install the [Siri Plus shortcut template](https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc) directly from iCloud on your iPhone or Mac, then edit the `Base URL` and `API Key` fields inside the shortcut to match your configuration.
+**Quickest method:** Install the Siri Plus shortcut template directly from iCloud — [🇬🇧 English](https://www.icloud.com/shortcuts/980fff4cb9fb479fadc07bef96d6943e) or [🇫🇷 French](https://www.icloud.com/shortcuts/e641e22518e445d7b01877bd65dde2de) — on your iPhone or Mac, then edit the `Base URL` and `API Key` fields inside the shortcut to match your configuration.
 
 Alternatively, generate a pre-configured shortcut with the provided script on macOS (stdlib only, no extra dependencies):
 

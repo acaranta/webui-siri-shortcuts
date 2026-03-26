@@ -100,12 +100,19 @@ _LANDING_HTML = """\
       </svg>
       GitHub
     </a>
-    <a class="link-btn shortcut" href="https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc" target="_blank" rel="noopener">
+    <a class="link-btn shortcut" href="https://www.icloud.com/shortcuts/980fff4cb9fb479fadc07bef96d6943e" target="_blank" rel="noopener">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/>
         <circle cx="12" cy="9" r="2.5"/>
       </svg>
-      Get Siri Shortcut
+      🇬🇧 Get Siri Shortcut
+    </a>
+    <a class="link-btn shortcut" href="https://www.icloud.com/shortcuts/e641e22518e445d7b01877bd65dde2de" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+      🇫🇷 Get Siri Shortcut
     </a>
   </div>
 </body>
