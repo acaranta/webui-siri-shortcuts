@@ -10,3 +10,7 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "uvicorn[standard]>=0.29.0",
 ]
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
