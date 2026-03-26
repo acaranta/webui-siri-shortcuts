@@ -53,6 +53,29 @@ _LANDING_HTML = """\
       color: #5ac8fa;
       font-family: ui-monospace, monospace;
     }
+    .links {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      color: #e8e8e8;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .link-btn:hover { background: #222; border-color: #444; }
+    .link-btn.shortcut { color: #5ac8fa; border-color: #1e3a4a; }
+    .link-btn.shortcut:hover { background: #0d2030; border-color: #5ac8fa; }
   </style>
 </head>
 <body>
@@ -60,6 +83,29 @@ _LANDING_HTML = """\
   <h1>webui-siri-shortcut</h1>
   <p>Siri Shortcut bridge for Open&nbsp;WebUI — say <em>"Hey Siri, Siri Plus"</em> to start a conversation.</p>
   <span class="badge">GET /api/health &nbsp;·&nbsp; POST /api/chat</span>
+  <div class="links">
+    <a class="link-btn" href="https://github.com/acaranta/webui-siri-shortcuts" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577
+          0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756
+          -1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07
+          1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.466-1.332
+          -5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005
+          -.322 3.3 1.23A11.51 11.51 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.29-1.552
+          3.297-1.23 3.297-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0
+          4.61-2.807 5.625-5.479 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015
+          3.286 0 .322.216.694.825.576C20.565 21.796 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+      </svg>
+      GitHub
+    </a>
+    <a class="link-btn shortcut" href="https://www.icloud.com/shortcuts/a1161406a96a4e9b84d7b690426e25cc" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+      Get Siri Shortcut
+    </a>
+  </div>
 </body>
 </html>
 """
