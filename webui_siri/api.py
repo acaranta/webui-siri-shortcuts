@@ -28,7 +28,8 @@ _LANDING_HTML = """\
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -40,7 +41,7 @@ _LANDING_HTML = """\
       padding: 2rem;
       text-align: center;
     }
-    img { width: 2800px; height: 280px; object-fit: contain; }
+    img { width: 280px; height: 280px; object-fit: contain; }
     h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
     p { color: #888; font-size: 0.95rem; max-width: 34ch; line-height: 1.5; }
     .badge {
