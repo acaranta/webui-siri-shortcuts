@@ -25,6 +25,7 @@ _LANDING_HTML = """\
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>webui-siri-shortcut</title>
+  <link rel="icon" type="image/png" href="/img/webui-siri-logo.png"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
