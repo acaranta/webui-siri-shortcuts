@@ -7,6 +7,9 @@
 <p align="center">
   <a href="https://github.com/acaranta/webui-siri-shortcuts"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-acaranta%2Fwebui--siri--shortcuts-181717?logo=github"/></a>
   <a href="https://hub.docker.com/r/acaranta/webui-siri-shortcuts"><img alt="Docker Hub" src="https://img.shields.io/badge/Docker%20Hub-acaranta%2Fwebui--siri--shortcuts-2496ED?logo=docker&logoColor=white"/></a>
+  <a href="https://hub.docker.com/r/acaranta/webui-siri-shortcuts/tags"><img alt="Docker Image Version" src="https://img.shields.io/docker/v/acaranta/webui-siri-shortcuts?sort=semver&logo=docker&logoColor=white&label=latest&color=2496ED"/></a>
+  <a href="https://hub.docker.com/r/acaranta/webui-siri-shortcuts"><img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/acaranta/webui-siri-shortcuts?logo=docker&logoColor=white&color=2496ED"/></a>
+  <a href="https://hub.docker.com/r/acaranta/webui-siri-shortcuts"><img alt="Docker Image Size" src="https://img.shields.io/docker/image-size/acaranta/webui-siri-shortcuts/latest?logo=docker&logoColor=white&color=2496ED"/></a>
   <a href="https://www.icloud.com/shortcuts/980fff4cb9fb479fadc07bef96d6943e"><img alt="Siri Shortcut 🇬🇧" src="https://img.shields.io/badge/Siri%20Shortcut-%F0%9F%87%AC%F0%9F%87%A7%20EN-5ac8fa?logo=apple"/></a>
   <a href="https://www.icloud.com/shortcuts/e641e22518e445d7b01877bd65dde2de"><img alt="Siri Shortcut 🇫🇷" src="https://img.shields.io/badge/Siri%20Shortcut-%F0%9F%87%AB%F0%9F%87%B7%20FR-5ac8fa?logo=apple"/></a>
 </p>
