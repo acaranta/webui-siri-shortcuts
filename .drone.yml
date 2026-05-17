@@ -1,0 +1,10 @@
+---
+kind: template
+load: docker-build-multiarch.yaml
+data:
+  dockerfiledir: .
+  hubimagename: webui-siri-shortcut
+  repotype: hub
+  imagetag: latest  
+  branches: ['master', 'main']
+  buildarch: linux/arm64/v8,linux/amd64
