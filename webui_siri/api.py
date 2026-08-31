@@ -225,7 +225,7 @@ def create_app(config: AppConfig, openwebui: OpenWebUIClient) -> FastAPI:
             _log.error("send_message failed: %s", exc)
             raise HTTPException(status_code=502, detail=f"OpenWebUI error: {exc}")
 
-        response_text = openwebui._extract_content_from_completion(result["completion"])
+        response_text = result["content"]
         if not response_text:
             response_text = "I didn't get a response. Please try again."
 
@@ -281,7 +281,7 @@ def create_app(config: AppConfig, openwebui: OpenWebUIClient) -> FastAPI:
             _log.error("send_message failed: %s", exc)
             raise HTTPException(status_code=502, detail=f"OpenWebUI error: {exc}")
 
-        response_text = openwebui._extract_content_from_completion(result["completion"])
+        response_text = result["content"]
         if not response_text:
             response_text = "I didn't get a response. Please try again."
 
