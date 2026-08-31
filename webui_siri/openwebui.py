@@ -280,7 +280,7 @@ class OpenWebUIClient:
         # 2. Persist the user message plus an empty assistant message: the
         #    server-side tool loop writes its answer into the latter, so both
         #    have to exist before the completion is fired.
-        await self._add_user_message_to_chat(
+        user_message = await self._add_user_message_to_chat(
             chat_id=chat_id,
             user_msg_id=user_msg_id,
             content=content,
@@ -301,6 +301,11 @@ class OpenWebUIClient:
             "stream": True,
             "chat_id": chat_id,
             "id": assistant_msg_id,
+            # Open WebUI owns the message tree: it writes the assistant message
+            # with parentId taken from user_message["id"], so without this the
+            # reply is stored detached and the chat shows nothing but the last
+            # answer.
+            "user_message": user_message,
             # Any non-empty session_id switches on the built-in tools (web
             # search, memory, ...) and makes the request asynchronous.
             "session_id": f"siri-{uuid.uuid4()}",
@@ -434,14 +439,26 @@ class OpenWebUIClient:
         timestamp: int,
         model: Optional[str] = None,
         assistant_msg_id: Optional[str] = None,
-    ) -> None:
+    ) -> dict[str, Any]:
         """Insert the user message into the chat's history linked-list.
 
         When *assistant_msg_id* is given, an empty assistant message is added
         as its child: Open WebUI's server-side tool loop only runs for a
         request whose assistant message already exists, and it writes the
         finished answer into that message.
+
+        Returns the user message as stored, so the completion request can hand
+        Open WebUI the very same object.
         """
+        user_message: dict[str, Any] = {
+            "id": user_msg_id,
+            "parentId": None,
+            "childrenIds": [assistant_msg_id] if assistant_msg_id else [],
+            "role": "user",
+            "content": content,
+            "timestamp": timestamp,
+            "models": [model] if model else [],
+        }
         try:
             resp = await self._client.get(f"/api/v1/chats/{chat_id}")
             if resp.status_code in (404, 405):
@@ -452,7 +469,7 @@ class OpenWebUIClient:
             chat_obj = data.get("chat") if isinstance(data.get("chat"), dict) else data
             if not isinstance(chat_obj, dict):
                 _log.warning("unexpected chat structure; skipping user message upsert")
-                return
+                return user_message
 
             if model:
                 chat_obj["model"] = model
@@ -466,17 +483,9 @@ class OpenWebUIClient:
             if not isinstance(msgs, dict):
                 msgs = {}
 
-            parent_id: Optional[str] = history.get("currentId")
+            user_message["parentId"] = history.get("currentId")
 
-            msgs[user_msg_id] = {
-                "id": user_msg_id,
-                "parentId": parent_id,
-                "childrenIds": [assistant_msg_id] if assistant_msg_id else [],
-                "role": "user",
-                "content": content,
-                "timestamp": timestamp,
-                "models": [model] if model else [],
-            }
+            msgs[user_msg_id] = user_message
             history["currentId"] = user_msg_id
 
             if assistant_msg_id:
@@ -519,6 +528,7 @@ class OpenWebUIClient:
                 "failed to upsert user message into chat history; "
                 "the response will still be returned but may not appear in the UI: %s", exc,
             )
+        return user_message
 
     async def _fetch_history_messages(self, chat_id: str) -> list[dict]:
         """Return the current conversation history as a chronological messages list."""
