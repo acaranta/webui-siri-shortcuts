@@ -3,7 +3,7 @@ kind: template
 load: docker-build-multiarch.yaml
 data:
   dockerfiledir: .
-  hubimagename: webui-siri-shortcut
+  hubimagename: webui-siri-shortcuts
   repotype: hub
   imagetag: latest  
   branches: ['master', 'main']
